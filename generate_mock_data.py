@@ -4,8 +4,7 @@ We need to :
 - generate stupid names
 - compress fcs and xml to zip
 - rename zip to .analysis
-- Corresponding entry in metadata?
-- Generate both cases
+- Corresponding entries in metadata?
 
 """
 # %%
