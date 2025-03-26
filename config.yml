@@ -1,0 +1,2 @@
+# Non standard yml, to be parsed with https://github.com/mkaranasou/pyaml_env
+DATAPATH: !ENV ${HOME}/Datasets/MockDataCHU
