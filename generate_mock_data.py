@@ -27,6 +27,8 @@ rng = np.random.default_rng(seed=1234)
 N_MOCK_COLUMNS = 10
 
 # TODO Add problematic information in fcs tags
+# TODO In metadata : age, problematic ID
+# TODO Name some patients with the second convention
 if __name__ == "__main__":
     with open("fake_names.txt", "r") as f:
         names = f.read().splitlines()

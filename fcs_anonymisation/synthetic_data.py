@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import random
 import shutil
+import string
 
 
 def capitalize_lastname(string):
@@ -47,6 +48,10 @@ def create_analysis(
     os.rename(f"{output_path}/{fname}.zip", f"{output_path}/{fname}.analysis")
     shutil.rmtree(temp_path)
     
+def generate_string(length):
+    letters = string.ascii_uppercase
+    random_letters = [random.choice(letters) for _ in range(length)]
+    return "".join(random_letters)
 
 def generate_id(length):
     digits = (str(random.randint(0, 9)) for _ in range(length))
@@ -63,11 +68,15 @@ def generate_patient_dict(name):
             joining_char = " "
         else:
             joining_char = ""
+    
+    ID = generate_string(5) + generate_id(8)
 
     patient_dict["Identifiant patient (NIP)"] = int(generate_id(9))
     patient_dict["Numero clinisight"] = int(generate_id(8))
     patient_dict["NOM"] = joining_char.join(last_names)
     patient_dict["Prénom"] = first_name
     patient_dict["sexe             (1=H, 2=F)"] = random.choice((1, 2))
+    patient_dict["FLT3"] = random.choice(("ITD", "WT", "TKD"))
+    patient_dict["ID"] = ID
     return patient_dict
 
