@@ -12,6 +12,7 @@ from pathlib import Path
 import shutil
 import os
 import pandas as pd
+import numpy as np
 import random
 from fcs_anonymisation import get_config
 
@@ -22,6 +23,7 @@ metadata = pd.read_excel(datapath / "metadata.xlsx")
 fcs_path = datapath / "0001.fcs"
 xml_path = datapath / "000003.xml"
 random.seed(1234)
+rng = np.random.default_rng(seed=1234)
 
 def capitalize_lastname(string):
     split = string.split(" ")
@@ -83,6 +85,7 @@ def generate_patient_dict(name):
     return patient_dict
 
 
+# %%
 if __name__ == "__main__":
     with open("fake_names.txt", "r") as f:
         names = f.read().splitlines()
@@ -98,7 +101,12 @@ if __name__ == "__main__":
         fake_metadata.append(patient_dict)
         
     fake_metadata = pd.DataFrame(fake_metadata)
-    # TODO Add random columns
-    #for i in range(10):
-    #    dtype = random.choice((int, float, str))
-    #    data = random.ra
+
+    # Add random columns and export
+    for i in range(10):
+        dtype = random.choice((int, float, str))
+        data = pd.Series(rng.random(size=len(fake_metadata))) * 10
+        data = data.astype(dtype)
+        fake_metadata[f"mock_col_{i}"] = data
+
+    fake_metadata.to_csv("mock_metadata.csv")
