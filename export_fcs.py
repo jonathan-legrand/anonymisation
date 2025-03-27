@@ -4,7 +4,12 @@ We want to convert a directory of sensitive analysis file and convert
 them to usable, anonymous fcs data, with the proper compensation matrix.
 """
 import argparse
+import os
 from pathlib import Path
+
+import pandas as pd
+
+from fcs_anonymisation.loading import read_analysis
 
 COL_WHITE_LIST = [
     "Identifiant patient (NIP)",
@@ -41,10 +46,12 @@ def mock_parser():
         def parse_args(self):
             args = {
                 "input_directory": "mock_dataset",
-                "metadata": "mock_metadata",
+                "metadata": "mock_metadata.xlsx",
+                "output_dir": "mock_output",
             }
             return args
     return Parser()
+
 
 if __name__ == "__main__":
     parser = mock_parser()
@@ -53,4 +60,15 @@ if __name__ == "__main__":
 
     input_path = Path(args["input_directory"])
     for fname in input_path.iterdir():
+        sample = read_analysis(fname)
         print(fname)
+    df = pd.read_excel(
+        args["metadata"]
+    )
+
+    os.makedirs(
+        args["output_dir"],
+        exist_ok=True
+    )
+
+# %%

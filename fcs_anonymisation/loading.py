@@ -2,6 +2,8 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import flowkit as fk
 import pandas as pd
+from zipfile import ZipFile
+import re
 
 class SampleManualCompensation(fk.Sample):
     def __init__(self, *args, xml_path, **kwargs):
@@ -35,3 +37,25 @@ class SampleManualCompensation(fk.Sample):
         
         matrix = fk.Matrix(p, detectors, fluorochromes)
         return matrix
+
+
+fcs_pattern = re.compile(r".*\.fcs$")
+xml_pattern = re.compile(r".*\.xml$")
+
+def read_analysis(fpath):
+    """
+    Extract analysis files, read and apply compensation, return fcs.
+    At this stage, the FCS isn't anonymous yet.
+    """
+    with ZipFile(fpath, "r") as analysis:
+        fnames = analysis.namelist()
+        fcs_files = tuple(filter(fcs_pattern.match, fnames))
+        xml_files = tuple(filter(xml_pattern.match, fnames))
+        assert len(fcs_files) == 1
+        assert len(xml_files) == 1
+        
+        with analysis.open(xml_files[0]) as xml_handle:
+            with analysis.open(fcs_files[0]) as fcs_handle:
+                sample = SampleManualCompensation(fcs_handle, xml_path=xml_handle)
+        return sample
+    

@@ -52,4 +52,4 @@ if __name__ == "__main__":
         data = data.astype(dtype)
         fake_metadata[f"mock_col_{i}"] = data
 
-    fake_metadata.to_csv("mock_metadata.csv")
+    fake_metadata.to_excel("mock_metadata.xlsx", index=0)
