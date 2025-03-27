@@ -40,6 +40,12 @@ def init_argparse() -> argparse.ArgumentParser:
         type=str,
         default="anonymous_fcs"
     )
+    parser.add_argument(
+        "--rename_with_col",
+        help="Path to output dir, default is anonymous_fcs in current directory",
+        type=str,
+        default="Numero clinisight"
+    )
     return parser
 
 def mock_parser():
@@ -49,6 +55,7 @@ def mock_parser():
                 "input_directory": "mock_dataset",
                 "metadata": "mock_metadata.xlsx",
                 "output_dir": "mock_output",
+                "rename_with_col": "Numero clinisight",
             }
             return args
     return Parser()
@@ -60,6 +67,7 @@ if __name__ == "__main__":
     print(args)
 
     input_path = Path(args["input_directory"])
+    new_name_col = args["rename_with_col"]
     
     metadata = pd.read_excel(
         args["metadata"]
@@ -68,6 +76,8 @@ if __name__ == "__main__":
     for fpath in input_path.iterdir():
         sample = read_analysis(fpath)
         matching_row, _ = best_matching_row(fpath.name, metadata)
+        new_name = matching_row[new_name_col]
+        print(new_name, end="\n\n")
 
     os.makedirs(
         args["output_dir"],

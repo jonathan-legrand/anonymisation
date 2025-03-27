@@ -35,5 +35,5 @@ def best_matching_row(file_id, metadata):
 
     best_match = candidates[best_match_idx]
     print(file_id)
-    print(best_match, " is best match", end="\n\n")
+    print(best_match, " is best match")
     return metadata.iloc[best_match_idx, :], max_sim
