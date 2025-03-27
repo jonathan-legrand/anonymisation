@@ -13,7 +13,11 @@ import numpy as np
 import random
 from fcs_anonymisation import get_config
 from fcs_anonymisation.synthetic_data import (
-    create_analysis, generate_patient_dict, random_capitalizing
+    create_analysis,
+    generate_patient_dict,
+    random_capitalizing,
+    generate_id,
+    generate_string
 )
 
 config = get_config()
@@ -26,9 +30,17 @@ random.seed(1234)
 rng = np.random.default_rng(seed=1234)
 N_MOCK_COLUMNS = 10
 
+def name_with_names(name, source, ID):
+    return f"{name} {source} bla bla-bla_bla {generate_id(4)}"
+
+def name_with_problematic_id(name, source, ID):
+    return f"BDX-{ID} {source} bla bla-bla_bla {generate_id(4)}"
+
+naming_conventions = (
+    name_with_names, name_with_problematic_id
+)
+
 # TODO Add problematic information in fcs tags
-# TODO In metadata : age, problematic ID
-# TODO Name some patients with the second convention
 if __name__ == "__main__":
     with open("fake_names.txt", "r") as f:
         names = f.read().splitlines()
@@ -39,10 +51,15 @@ if __name__ == "__main__":
             random.choice(("Moelle", "Sang"))
         )
         randname_analysis = random_capitalizing(name)
-        fname = f"{randname_analysis} {source} blabla blabla-bla_bla"
+        ID = generate_string(5) + generate_id(8)
+
+        naming_func = random.choice(naming_conventions)
+        fname = naming_func(name, source, ID)
+
         create_analysis(fname, fcs_path, xml_path)
 
         patient_dict = generate_patient_dict(name)
+        patient_dict["ID"] = ID
         fake_metadata.append(patient_dict)
         
     fake_metadata = pd.DataFrame(fake_metadata)

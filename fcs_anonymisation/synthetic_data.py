@@ -69,7 +69,6 @@ def generate_patient_dict(name):
         else:
             joining_char = ""
     
-    ID = generate_string(5) + generate_id(8)
 
     patient_dict["Identifiant patient (NIP)"] = int(generate_id(9))
     patient_dict["Numero clinisight"] = int(generate_id(8))
@@ -77,6 +76,5 @@ def generate_patient_dict(name):
     patient_dict["Prénom"] = first_name
     patient_dict["sexe             (1=H, 2=F)"] = random.choice((1, 2))
     patient_dict["FLT3"] = random.choice(("ITD", "WT", "TKD"))
-    patient_dict["ID"] = ID
     return patient_dict
 
