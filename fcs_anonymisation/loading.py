@@ -30,7 +30,8 @@ class SampleManualCompensation(fk.Sample):
         generator = (child.attrib for child in compensation_element.find("S"))
         compensation_df = pd.DataFrame(generator).sort_values(by="S")
         p = compensation_df.pivot(index="S", columns="C", values="V").astype(float)
-        p = p.loc[channels, channels]
+        p = p.loc[channels, channels].values
+        p = np.where(np.isnan(p), 0, p)
         
-        matrix = fk.Matrix(p.values, detectors, fluorochromes)
+        matrix = fk.Matrix(p, detectors, fluorochromes)
         return matrix

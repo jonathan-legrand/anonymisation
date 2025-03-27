@@ -26,6 +26,7 @@ random.seed(1234)
 rng = np.random.default_rng(seed=1234)
 N_MOCK_COLUMNS = 10
 
+# TODO Add problematic information in fcs tags
 if __name__ == "__main__":
     with open("fake_names.txt", "r") as f:
         names = f.read().splitlines()
