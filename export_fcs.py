@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 
 from fcs_anonymisation.loading import read_analysis
+from fcs_anonymisation.matching import best_matching_row
 
 COL_WHITE_LIST = [
     "Identifiant patient (NIP)",
@@ -59,12 +60,14 @@ if __name__ == "__main__":
     print(args)
 
     input_path = Path(args["input_directory"])
-    for fname in input_path.iterdir():
-        sample = read_analysis(fname)
-        print(fname)
-    df = pd.read_excel(
+    
+    metadata = pd.read_excel(
         args["metadata"]
     )
+
+    for fpath in input_path.iterdir():
+        sample = read_analysis(fpath)
+        matching_row, _ = best_matching_row(fpath.name, metadata)
 
     os.makedirs(
         args["output_dir"],
