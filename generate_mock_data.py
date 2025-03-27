@@ -47,18 +47,20 @@ def random_capitalizing(string):
     )
     return func(string)
 
-def write_analysis(fname, output_path="mock_dataset"):
+def create_analysis(fname, output_path="mock_dataset"):
     """
-    Impure function! TODO There's nothing in the analysis files!!!!
+    Impure function!
     """
-    path = f"/tmp/{fname}"
-    if os.path.exists(path):
-        shutil.rmtree(path)
-    os.mkdir(path)
+    temp_path = Path("/tmp") / fname
+    if os.path.exists(temp_path):
+        shutil.rmtree(temp_path)
+    os.mkdir(temp_path)
+    shutil.copyfile(fcs_path, temp_path / f"uninformative_name.fcs")
+    shutil.copyfile(xml_path, temp_path / f"uninformative_name.xml")
     
-    shutil.make_archive(f"{output_path}/{fname}", "zip", path)
-    os.rename(f"{output_path}/{fname}.zip", f"{output_path}/{fname}.analysis")
-    shutil.rmtree(path)
+    shutil.make_archive(f"{output_path}/{fname}", "zip", temp_path)
+   # os.rename(f"{output_path}/{fname}.zip", f"{output_path}/{fname}.analysis")
+    shutil.rmtree(temp_path)
     
 
 def generate_id(length):
@@ -91,11 +93,14 @@ if __name__ == "__main__":
         names = f.read().splitlines()
     fake_metadata = []
     for name in names:
+        
         source = random_capitalizing(
             random.choice(("Moelle", "Sang"))
         )
         randname_analysis = random_capitalizing(name)
         fname = f"{randname_analysis} {source} blabla blabla-bla_bla"
+        create_analysis(fname)
+
 
         patient_dict = generate_patient_dict(name)
         fake_metadata.append(patient_dict)
