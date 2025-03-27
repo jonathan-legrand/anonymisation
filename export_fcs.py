@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 
 import pandas as pd
+import flowkit as fk
 
 from fcs_anonymisation.loading import read_analysis
 from fcs_anonymisation.matching import best_matching_row
@@ -25,7 +26,7 @@ def init_argparse() -> argparse.ArgumentParser:
         description=docstring
     )
     parser.add_argument(
-        "--input_directory",
+        "--input_dir",
         help="Directory containing the raw analysis files",
         default="mock_dataset" # TODO For tests only
     )
@@ -52,7 +53,7 @@ def mock_parser():
     class Parser:
         def parse_args(self):
             args = {
-                "input_directory": "mock_dataset",
+                "input_dir": "mock_dataset",
                 "metadata": "mock_metadata.xlsx",
                 "output_dir": "mock_output",
                 "rename_with_col": "Numero clinisight",
@@ -61,12 +62,13 @@ def mock_parser():
     return Parser()
 
 
+# TODO The whole tube situation, oh no
 if __name__ == "__main__":
     parser = mock_parser()
     args = parser.parse_args()
     print(args)
 
-    input_path = Path(args["input_directory"])
+    input_path = Path(args["input_dir"])
     new_name_col = args["rename_with_col"]
     
     metadata = pd.read_excel(
@@ -78,6 +80,23 @@ if __name__ == "__main__":
         matching_row, _ = best_matching_row(fpath.name, metadata)
         new_name = matching_row[new_name_col]
         print(new_name, end="\n\n")
+
+        sample_df = sample.as_dataframe(
+            source="raw",
+            subsample=False,
+            col_multi_index=True
+        )
+        anonymous_sample = fk.Sample(
+            sample_df,
+            sample_id=new_name,
+            compensation=sample.compensation
+        )
+        anonymous_sample.export(
+            filename=f"id-{new_name}_source-comp.fcs",
+            source="comp",
+            include_metadata=False,
+            directory=args["output_dir"]
+        )
 
     os.makedirs(
         args["output_dir"],
