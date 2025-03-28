@@ -34,7 +34,7 @@ class SampleManualCompensation(fk.Sample):
         p = compensation_df.pivot(index="S", columns="C", values="V").astype(float)
         p = p.loc[channels, channels].values
         p = np.where(np.isnan(p), 0, p)
-        
+        np.fill_diagonal(p, 1)
         matrix = fk.Matrix(p, detectors, fluorochromes)
         return matrix
 

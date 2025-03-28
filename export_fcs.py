@@ -107,13 +107,13 @@ if __name__ == "__main__":
             compensation=sample.compensation
         )
         anonymous_sample.export(
-            filename=f"id-{new_name}.fcs",
+            filename=f"{new_name}.fcs",
             source="comp",
             include_metadata=False,
             directory=output_path / "Samples"
         )
         sample_compensation.to_csv(
-            output_path / "Compensation" / f"id-{new_name}.csv"
+            output_path / "Compensation" / f"{new_name}.csv"
         )
 
 
