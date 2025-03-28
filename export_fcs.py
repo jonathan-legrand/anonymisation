@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
         sample_df = sample.as_dataframe(
             source="raw",
-            subsample=False, # DELETE ME
+            subsample=False,
             col_multi_index=True,
         )
         sample_compensation = sample.compensation.as_dataframe(fluoro_labels=True)
