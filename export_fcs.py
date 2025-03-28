@@ -108,7 +108,7 @@ if __name__ == "__main__":
         )
         anonymous_sample.export(
             filename=f"{new_name}.fcs",
-            source="comp",
+            source="raw",
             include_metadata=False,
             directory=output_path / "Samples"
         )
