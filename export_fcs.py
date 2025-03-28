@@ -7,8 +7,11 @@ import argparse
 import os
 from pathlib import Path
 
+from matplotlib import pyplot as plt
 import pandas as pd
 import flowkit as fk
+import seaborn as sns
+from bokeh.io import show
 
 from fcs_anonymisation.loading import read_analysis
 from fcs_anonymisation.matching import best_matching_row
@@ -62,17 +65,27 @@ def mock_parser():
     return Parser()
 
 
-# TODO The whole tube situation, oh no
 if __name__ == "__main__":
     parser = mock_parser()
     args = parser.parse_args()
     print(args)
 
     input_path = Path(args["input_dir"])
+    output_path = Path(args["output_dir"])
     new_name_col = args["rename_with_col"]
     
     metadata = pd.read_excel(
         args["metadata"]
+    )
+    
+    # TODO Any standard we can use? From ImmPort maybe?
+    os.makedirs(
+        output_path / "Compensation",
+        exist_ok=True
+    )
+    os.makedirs(
+        output_path / "Samples",
+        exist_ok=True
     )
 
     for fpath in input_path.iterdir():
@@ -83,24 +96,25 @@ if __name__ == "__main__":
 
         sample_df = sample.as_dataframe(
             source="raw",
-            subsample=False,
-            col_multi_index=True
+            subsample=False, # DELETE ME
+            col_multi_index=True,
         )
+        sample_compensation = sample.compensation.as_dataframe(fluoro_labels=True)
+
         anonymous_sample = fk.Sample(
             sample_df,
             sample_id=new_name,
             compensation=sample.compensation
         )
         anonymous_sample.export(
-            filename=f"id-{new_name}_source-comp.fcs",
+            filename=f"id-{new_name}.fcs",
             source="comp",
             include_metadata=False,
-            directory=args["output_dir"]
+            directory=output_path / "Samples"
+        )
+        sample_compensation.to_csv(
+            output_path / "Compensation" / f"id-{new_name}.csv"
         )
 
-    os.makedirs(
-        args["output_dir"],
-        exist_ok=True
-    )
 
 # %%
