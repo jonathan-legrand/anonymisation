@@ -25,7 +25,6 @@ def get_specimen(file_id):
         for candidate in specimen_french:
             if word == candidate:
                 specimen = specimen_translation[word]
-    print(file_id, specimen)
     return specimen
 
 def matching(file_id, candidates):
