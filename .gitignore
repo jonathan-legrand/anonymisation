@@ -4,3 +4,5 @@ mock_dataset
 mock_output
 .venv
 *.fcs
+*.xlsx
+*.csv
