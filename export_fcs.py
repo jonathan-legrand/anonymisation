@@ -127,14 +127,16 @@ if __name__ == "__main__":
             sample_id=new_name,
             compensation=sample.compensation
         )
+        # TODO Add sample origin, blood or marrow
+        export_name = f"id-{new_name}"
         anonymous_sample.export(
-            filename=f"id-{new_name}.fcs",
+            filename=export_name + ".fcs",
             source="raw",
             include_metadata=False,
             directory=output_path / "samples"
         )
         sample_compensation.to_csv(
-            output_path / "compensation_matrices" / f"{new_name}.csv"
+            output_path / "compensation_matrices" / (export_name + ".csv")
         )
 
         anonymous_metadata.append(
