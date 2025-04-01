@@ -3,3 +3,4 @@ source_data
 mock_dataset
 mock_output
 .venv
+*.fcs
