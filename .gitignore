@@ -6,4 +6,6 @@ mock_output
 *.fcs
 *.xlsx
 *.csv
+*.tsv
 *.analysis
+anonymous_fcs
