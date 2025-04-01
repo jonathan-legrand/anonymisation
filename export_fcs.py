@@ -20,6 +20,7 @@ COL_WHITE_LIST = [
     "Identifiant patient (NIP)",
     "Numero clinisight",
     "sexe             (1=H, 2=F)",
+    "FLT3",
     "mock_col_2"
 ]
 TAGS_WHITE_LIST = []
@@ -80,14 +81,15 @@ if __name__ == "__main__":
     
     # TODO Any standard we can use? From ImmPort maybe?
     os.makedirs(
-        output_path / "Compensation",
+        output_path / "compensation_matrices",
         exist_ok=True
     )
     os.makedirs(
-        output_path / "Samples",
+        output_path / "samples",
         exist_ok=True
     )
 
+    anonymous_metadata = []
     for fpath in input_path.iterdir():
         sample = read_analysis(fpath)
         matching_row, _ = best_matching_row(fpath.name, metadata)
@@ -110,11 +112,17 @@ if __name__ == "__main__":
             filename=f"{new_name}.fcs",
             source="raw",
             include_metadata=False,
-            directory=output_path / "Samples"
+            directory=output_path / "samples"
         )
         sample_compensation.to_csv(
-            output_path / "Compensation" / f"{new_name}.csv"
+            output_path / "compensation_matrices" / f"{new_name}.csv"
         )
+
+        anonymous_metadata.append(
+            matching_row[COL_WHITE_LIST]
+        )
+    anonymous_metadata = pd.DataFrame(anonymous_metadata)
+    anonymous_metadata.to_csv(output_path / "metadata.csv")
 
 
 # %%
