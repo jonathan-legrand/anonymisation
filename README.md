@@ -8,7 +8,7 @@ All dependencies can be [installed from the requirements file](https://pip.pypa.
 Creates 20 analysis files from a fcs and its xml sidecar. `datapath` and xml/fcs file names must be set respectively in `config.yaml` and inside the script.
 
 # Create anonymous directory
-This command creates an `anonymous_fcs` directory from a directory containing .analysis files and an excel metadata file.
+This command creates an `anonymous_fcs` directory from a directory containing .analysis files and an excel metadata file :
 
 ```python export_fcs --input_dir SENSITIVE_FCS_DIR --metadata METADATA_FILE.xslx```
 
