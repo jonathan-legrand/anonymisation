@@ -5,25 +5,22 @@ them to usable, anonymous fcs data, with the proper compensation matrix.
 """
 import argparse
 import os
+import json
 from pathlib import Path
 
 from matplotlib import pyplot as plt
 import pandas as pd
 import flowkit as fk
 import seaborn as sns
-from bokeh.io import show
 
 from fcs_anonymisation.loading import read_analysis
 from fcs_anonymisation.matching import best_matching_row
+from fcs_anonymisation.defaults import (
+    COLS_DESCRIPTION,
+    COL_WHITE_LIST,
+    TAGS_WHITE_LIST
+)
 
-COL_WHITE_LIST = [
-    "Identifiant patient (NIP)",
-    "Numero clinisight",
-    "sexe             (1=H, 2=F)",
-    "FLT3",
-    "mock_col_2"
-]
-TAGS_WHITE_LIST = []
 
 def init_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -79,7 +76,6 @@ if __name__ == "__main__":
         args["metadata"]
     )
     
-    # TODO Any standard we can use? From ImmPort maybe?
     os.makedirs(
         output_path / "compensation_matrices",
         exist_ok=True
@@ -109,7 +105,7 @@ if __name__ == "__main__":
             compensation=sample.compensation
         )
         anonymous_sample.export(
-            filename=f"{new_name}.fcs",
+            filename=f"id-{new_name}.fcs",
             source="raw",
             include_metadata=False,
             directory=output_path / "samples"
@@ -122,7 +118,11 @@ if __name__ == "__main__":
             matching_row[COL_WHITE_LIST]
         )
     anonymous_metadata = pd.DataFrame(anonymous_metadata)
-    anonymous_metadata.to_csv(output_path / "metadata.csv")
+    anonymous_metadata.to_csv(
+        output_path / "patients.tsv", sep="\t"
+    )
+    with open(output_path / "patients.json", "w") as stream:
+        json.dump(COLS_DESCRIPTION, stream)
 
 
 # %%
