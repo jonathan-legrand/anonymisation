@@ -1,7 +1,7 @@
 # %%
 docstring = """
 We want to convert a directory of sensitive analysis file and convert
-them to usable, anonymous fcs data, with the proper compensation matrix.
+them to usable, anonymous fcs data, with the proper compensation matrices.
 """
 import argparse
 import os
@@ -14,7 +14,7 @@ import flowkit as fk
 import seaborn as sns
 
 from fcs_anonymisation.loading import read_analysis
-from fcs_anonymisation.matching import best_matching_row
+from fcs_anonymisation.matching import best_matching_row, get_specimen
 from fcs_anonymisation.defaults import (
     COLS_DESCRIPTION,
     COL_WHITE_LIST,
@@ -66,7 +66,7 @@ def mock_parser():
                 "rename_with_col": "Identifiant patient (NIP)",
                 "colspecs": "colspecs/mock_data",
             }
-            return args
+            return argparse.Namespace(**args)
     return Parser()
 
 
@@ -84,8 +84,8 @@ def load_col_specs(args):
         
 
 if __name__ == "__main__":
-    #parser = mock_parser()
-    parser = init_argparse()
+    parser = mock_parser()
+    #parser = init_argparse()
     args = vars(parser.parse_args())
     print(args)
 
@@ -112,7 +112,11 @@ if __name__ == "__main__":
     for fpath in input_path.iterdir():
         sample = read_analysis(fpath)
         matching_row, _ = best_matching_row(fpath.name, metadata)
+        specimen = get_specimen(fpath.name)
         new_name = matching_row[new_name_col]
+
+        export_name = f"id-{new_name}_specimen-{specimen}"
+
         print(new_name, end="\n\n")
 
         sample_df = sample.as_dataframe(
@@ -128,7 +132,6 @@ if __name__ == "__main__":
             compensation=sample.compensation
         )
         # TODO Add sample origin, blood or marrow
-        export_name = f"id-{new_name}"
         anonymous_sample.export(
             filename=export_name + ".fcs",
             source="raw",
