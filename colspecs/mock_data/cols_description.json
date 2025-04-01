@@ -1,16 +1,6 @@
-COL_WHITE_LIST = [
-    "Identifiant patient (NIP)",
-    "Numero clinisight",
-    "sexe             (1=H, 2=F)",
-    "FLT3",
-    "NPM"
-]
-
-# Optional description of columns
-# for the patients.json file
-COLS_DESCRIPTION = {
+{
     "Identifiant patient (NIP)": {
-        "Description": "Patients ID",
+        "Description": "Patients ID"
     },
     "sexe             (1=H, 2=F)": {
         "Description": "Patient's sex",
@@ -28,9 +18,11 @@ COLS_DESCRIPTION = {
             "NF": "Non Fait, undetermined"
         }
     },
+    "mock_col_2": {
+        "Description": "Randomly generated column"
+    },
     "NPM": {
         "Description": "NPM mutation status"
     }
+    
 }
-
-TAGS_WHITE_LIST = []

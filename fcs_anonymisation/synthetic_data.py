@@ -76,5 +76,6 @@ def generate_patient_dict(name):
     patient_dict["Prénom"] = first_name
     patient_dict["sexe             (1=H, 2=F)"] = random.choice((1, 2))
     patient_dict["FLT3"] = random.choice(("ITD", "WT", "TKD"))
+    patient_dict["NPM"] = random.choice(("neg", "NF", "NPM type A", "NPM type D"))
     return patient_dict
 
