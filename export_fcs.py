@@ -114,8 +114,7 @@ if __name__ == "__main__":
         new_name = matching_row[new_name_col]
 
         export_name = f"id-{new_name}_specimen-{specimen}"
-
-        print(new_name, end="\n\n")
+        print("export to", export_name, end="\n\n")
 
         sample_df = sample.as_dataframe(
             source="raw",
@@ -129,7 +128,6 @@ if __name__ == "__main__":
             sample_id=new_name,
             compensation=sample.compensation
         )
-        # TODO Add sample origin, blood or marrow
         anonymous_sample.export(
             filename=export_name + ".fcs",
             source="raw",
