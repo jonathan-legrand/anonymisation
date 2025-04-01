@@ -29,12 +29,10 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument(
         "--input_dir",
         help="Directory containing the raw analysis files",
-        default="mock_dataset" # TODO For tests only
     )
     parser.add_argument(
         "--metadata",
         help="csv or xlsx files containing patients information",
-        default="mock_metadata.xlsx"
     )
     parser.add_argument(
         "--output_dir",
@@ -84,8 +82,8 @@ def load_col_specs(args):
         
 
 if __name__ == "__main__":
-    parser = mock_parser()
-    #parser = init_argparse()
+    #parser = mock_parser()
+    parser = init_argparse()
     args = vars(parser.parse_args())
     print(args)
 
