@@ -34,7 +34,7 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument(
         "--metadata",
         help="csv or xlsx files containing patients information",
-        default="mock_metadata.csv"
+        default="mock_metadata.xlsx"
     )
     parser.add_argument(
         "--output_dir",
@@ -50,7 +50,7 @@ def init_argparse() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--colspecs",
-        help="Path to python file containing cols white list and description",
+        help="Path to dir containing cols white list and description",
         type=str,
         default=None
     )
@@ -84,10 +84,12 @@ def load_col_specs(args):
         
 
 if __name__ == "__main__":
-    parser = mock_parser()
-    args = parser.parse_args()
+    #parser = mock_parser()
+    parser = init_argparse()
+    args = vars(parser.parse_args())
     print(args)
 
+    print(args["input_dir"])
     input_path = Path(args["input_dir"])
     output_path = Path(args["output_dir"])
     new_name_col = args["rename_with_col"]

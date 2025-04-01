@@ -1,0 +1,21 @@
+{
+    "Identifiant patient (NIP)": {
+        "Description": "Patients ID"
+    },
+    "FLT3": {
+        "Description": "FLT3 mutation status",
+        "Levels": {
+            "WT": "Not mutated",
+            "ITD": "Internal Tandem Duplication",
+            "TKD": "Tyrosine Kinase Domain",
+            "NF": "Non Fait, undetermined"
+        }
+    },
+    "mock_col_2": {
+        "Description": "Randomly generated column"
+    },
+    "NPM": {
+        "Description": "NPM mutation status"
+    }
+    
+}
