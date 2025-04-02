@@ -34,28 +34,25 @@ def matching(file_id, candidates):
     raise a value error.
     """
     similarities = []
-    ratios = []
-    for candidate in candidates:
-        sim = SM(None, file_id, candidate)
-        ratios.append(sim.ratio())
-        similarities.append(sim)
+    for idx, candidate in enumerate(candidates):
+        sm = SM(None, file_id, candidate)
+        similarities.append(
+            (idx, sm, candidate)
+        )
 
-    best_match_idx = np.argmax(ratios)
-    best_match = similarities[best_match_idx].find_longest_match()
+    best_idx, best_sim, best_candidate = max(similarities, key=lambda x: x[1].ratio())
+    best_match = best_sim.find_longest_match()
 
-    best_candidate_len = len(candidates[best_match_idx])
-    best_match_len = best_match.size
-
-    if best_match.size < len(candidates[best_match_idx]):
+    if best_match.size != len(best_candidate):
         raise ValueError(
             f"""
-        Matched :
-        {file_id} and
-        {candidates[best_match_idx]}
-        Best match of length {best_match_len} with a candidate string of length {best_candidate_len}
+        Could not match :
+        {file_id}
+        {best_candidate} is best candidate
+        Best match of length {len(best_match)} with a candidate string of length {len(best_candidate)}
             """
         )
-    return best_match_idx, ratios[best_match_idx]
+    return best_idx, best_sim.ratio()
 
 def best_matching_row(file_id, metadata):
     """
@@ -75,7 +72,7 @@ def best_matching_row(file_id, metadata):
         candidates = names
     best_match_idx, max_sim = matching(file_id, candidates)
     
-    best_match = candidates[best_match_idx]
+    best_candidate = candidates[best_match_idx]
     print(file_id)
-    print(best_match, f" is best match with sim {max_sim}")
+    print(best_candidate, f" is best candidate with sim {max_sim}")
     return metadata.iloc[best_match_idx, :], max_sim

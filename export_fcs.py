@@ -18,9 +18,7 @@ from fcs_anonymisation.matching import best_matching_row, get_specimen
 from fcs_anonymisation.defaults import (
     COLS_DESCRIPTION,
     COL_WHITE_LIST,
-    TAGS_WHITE_LIST
 )
-
 
 def init_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
