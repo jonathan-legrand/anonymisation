@@ -109,7 +109,13 @@ if __name__ == "__main__":
     anonymous_metadata = []
     for fpath in input_path.iterdir():
         sample = read_analysis(fpath)
-        matching_row, _ = best_matching_row(fpath.name, metadata)
+        try:
+            matching_row, _ = best_matching_row(fpath.name, metadata)
+        except ValueError as err:
+            print(err)
+            print(f"No good enough matching row found for {fpath}, skipping")
+            continue
+
         specimen = get_specimen(fpath.name)
         new_name = matching_row[new_name_col]
 

@@ -28,13 +28,34 @@ def get_specimen(file_id):
     return specimen
 
 def matching(file_id, candidates):
+    """
+    Match sequences with difflib. We enforce that 
+    the candidate key is fully matched, otherwise
+    raise a value error.
+    """
     similarities = []
+    ratios = []
     for candidate in candidates:
-        sim = SM(is_junk, file_id, candidate)
-        similarities.append(sim.ratio())
+        sim = SM(None, file_id, candidate)
+        ratios.append(sim.ratio())
+        similarities.append(sim)
 
-    best_match_idx = np.argmax(similarities)
-    return best_match_idx, similarities[best_match_idx]
+    best_match_idx = np.argmax(ratios)
+    best_match = similarities[best_match_idx].find_longest_match()
+
+    best_candidate_len = len(candidates[best_match_idx])
+    best_match_len = best_match.size
+
+    if best_match.size < len(candidates[best_match_idx]):
+        raise ValueError(
+            f"""
+        Matched :
+        {file_id} and
+        {candidates[best_match_idx]}
+        Best match of length {best_match_len} with a candidate string of length {best_candidate_len}
+            """
+        )
+    return best_match_idx, ratios[best_match_idx]
 
 def best_matching_row(file_id, metadata):
     """
@@ -56,5 +77,5 @@ def best_matching_row(file_id, metadata):
     
     best_match = candidates[best_match_idx]
     print(file_id)
-    print(best_match, " is best match")
+    print(best_match, f" is best match with sim {max_sim}")
     return metadata.iloc[best_match_idx, :], max_sim

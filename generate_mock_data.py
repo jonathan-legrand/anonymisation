@@ -40,7 +40,6 @@ naming_conventions = (
     name_with_names, name_with_problematic_id
 )
 
-# TODO Add problematic information in fcs tags
 if __name__ == "__main__":
     with open("fake_names.txt", "r") as f:
         names = f.read().splitlines()
@@ -60,6 +59,15 @@ if __name__ == "__main__":
 
         patient_dict = generate_patient_dict(name)
         patient_dict["ID"] = ID
+        
+        # Just for fun, assume that sometimes a file
+        # does not correspond to an entry in metadata.
+        skip_metadata = np.random.choice(
+            (True, False), p=(0.1, 0.9)
+        )
+        if skip_metadata:
+            print(f"Exluded {patient_dict}")
+            continue
         fake_metadata.append(patient_dict)
         
     fake_metadata = pd.DataFrame(fake_metadata)
