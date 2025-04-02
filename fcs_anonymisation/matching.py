@@ -3,6 +3,7 @@ from difflib import SequenceMatcher as SM
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import copy
 
 def is_junk(character):
     if character in ("(", ")", "_", " ", "BDX-"):
@@ -27,6 +28,15 @@ def get_specimen(file_id):
                 specimen = specimen_translation[word]
     return specimen
 
+NUISANCE_CHARACTERS = (
+    " ", "_", "(", ")"
+)
+def remove_nuisance_chars(string, nuisance_characters=NUISANCE_CHARACTERS):
+    naked_string = copy.copy(string)
+    for char in nuisance_characters:
+        naked_string = naked_string.replace(char, "")
+    return naked_string
+
 def matching(file_id, candidates):
     """
     Match sequences with difflib. We enforce that 
@@ -34,22 +44,26 @@ def matching(file_id, candidates):
     raise a value error.
     """
     similarities = []
+    naked_id = remove_nuisance_chars(file_id)
+    
     for idx, candidate in enumerate(candidates):
-        sm = SM(None, file_id, candidate)
+        naked_candidate = remove_nuisance_chars(candidate)
+        sm = SM(None, naked_id, naked_candidate)
         similarities.append(
-            (idx, sm, candidate)
+            (idx, sm, naked_candidate)
         )
 
     best_idx, best_sim, best_candidate = max(similarities, key=lambda x: x[1].ratio())
     best_match = best_sim.find_longest_match()
+    print(best_match)
 
-    if best_match.size != len(best_candidate):
+    if best_match.size < len(best_candidate):
         raise ValueError(
             f"""
         Could not match :
         {file_id}
         {best_candidate} is best candidate
-        Best match of length {len(best_match)} with a candidate string of length {len(best_candidate)}
+        Best match of length {best_match.size} with a candidate string of length {len(best_candidate)}
             """
         )
     return best_idx, best_sim.ratio()
@@ -74,5 +88,5 @@ def best_matching_row(file_id, metadata):
     
     best_candidate = candidates[best_match_idx]
     print(file_id)
-    print(best_candidate, f" is best candidate with sim {max_sim}")
+    print(best_candidate, f"is best candidate with sim {max_sim}")
     return metadata.iloc[best_match_idx, :], max_sim
