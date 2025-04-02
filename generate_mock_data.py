@@ -47,7 +47,10 @@ if __name__ == "__main__":
     for name in names:
         
         source = random_capitalizing(
-            random.choice(("Moelle", "Sang"))
+            np.random.choice(
+                ("Moelle", "Sang", "Sng", "Moele"),
+                p=(0.4, 0.4, 0.1, 0.1) # We want to be robust against bad spelling
+            )
         )
         randname_analysis = random_capitalizing(name)
         ID = generate_string(5) + generate_id(8)
@@ -63,7 +66,7 @@ if __name__ == "__main__":
         # Just for fun, assume that sometimes a file
         # does not correspond to an entry in metadata.
         skip_metadata = np.random.choice(
-            (True, False), p=(0.1, 0.9)
+            (True, False), p=(0.2, 0.8)
         )
         if skip_metadata:
             print(f"Exluded {patient_dict}")
