@@ -1,9 +1,14 @@
 import xml.etree.ElementTree as ET
-import numpy as np
-import flowkit as fk
-import pandas as pd
 from zipfile import ZipFile
 import re
+import os
+import tempfile
+
+import numpy as np
+import pandas as pd
+import flowkit as fk
+from flowio import read_multiple_data_sets
+
 
 class SampleManualCompensation(fk.Sample):
     def __init__(self, *args, xml_path, **kwargs):
@@ -53,9 +58,23 @@ def read_analysis(fpath):
         xml_files = tuple(filter(xml_pattern.match, fnames))
         assert len(fcs_files) == 1
         assert len(xml_files) == 1
-        
+
+        # Extract the FCS file to a temporary file and read datasets from it
+        # because read_multiple_datasets is broken with file streams
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_fcs:
+            tmp_fcs.write(analysis.read(fcs_files[0]))
+            tmp_fcs_path = tmp_fcs.name
+
+        # Read the FCS file using the file path
+        # Sometimes there are several datasets per 
+        # fcs file, we are only interested in first one
+        samples = read_multiple_data_sets(tmp_fcs_path)
         with analysis.open(xml_files[0]) as xml_handle:
-            with analysis.open(fcs_files[0]) as fcs_handle:
-                sample = SampleManualCompensation(fcs_handle, xml_path=xml_handle)
-        return sample
+            sample = SampleManualCompensation(
+                samples[0], xml_path=xml_handle
+            )
+
+        os.remove(tmp_fcs_path)
+
+    return sample
     
