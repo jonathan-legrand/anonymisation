@@ -8,7 +8,6 @@ import os
 import json
 from pathlib import Path
 
-from matplotlib import pyplot as plt
 import pandas as pd
 import flowkit as fk
 import seaborn as sns
@@ -111,13 +110,15 @@ if __name__ == "__main__":
             matching_row, _ = best_matching_row(fpath.name, metadata)
         except ValueError as err:
             print(err)
-            print(f"No good enough matching row found for {fpath}, skipping")
-            continue
+            #print(f"No good enough matching row found for {fpath}, skipping")
+            print("UNCOMMENT MY FRIENDS")
+            #continue
 
         specimen = get_specimen(fpath.name)
-        new_name = matching_row[new_name_col]
+        #new_name = matching_row[new_name_col]
+        new_name = fpath.name
 
-        export_name = f"id-{new_name}_specimen-{specimen}"
+        export_name = f"sub-{new_name}_specimen-{specimen}"
         print("export to", export_name, end="\n\n")
 
         sample_df = sample.as_dataframe(
@@ -127,19 +128,21 @@ if __name__ == "__main__":
         )
         sample_compensation = sample.compensation.as_dataframe(fluoro_labels=True)
 
+        os.mkdir(output_path / export_name)
+
         anonymous_sample = fk.Sample(
             sample_df,
             sample_id=new_name,
             compensation=sample.compensation
         )
         anonymous_sample.export(
-            filename=export_name + ".fcs",
+            filename=f"{export_name}_sample.fcs",
             source="raw",
             include_metadata=False,
-            directory=output_path / "samples"
+            directory=output_path / export_name
         )
         sample_compensation.to_csv(
-            output_path / "compensation_matrices" / (export_name + ".csv")
+            output_path / export_name / f"{export_name}_compensation.csv"
         )
 
         anonymous_metadata.append(

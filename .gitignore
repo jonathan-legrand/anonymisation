@@ -9,3 +9,4 @@ mock_output
 *.tsv
 *.analysis
 anonymous_fcs
+debug*
