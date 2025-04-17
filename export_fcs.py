@@ -103,13 +103,12 @@ if __name__ == "__main__":
             matching_row, _ = best_matching_row(fpath.name, metadata)
         except ValueError as err:
             print(err)
-            #print(f"No good enough matching row found for {fpath}, skipping")
-            print("UNCOMMENT MY FRIENDS")
-            #continue
+            print(f"No good enough matching row found for {fpath}, skipping")
+            continue
 
         specimen = get_specimen(fpath.name)
-        #new_name = matching_row[new_name_col]
-        new_name = fpath.name
+        new_name = matching_row[new_name_col]
+        #new_name = fpath.name
 
         export_name = f"sub-{new_name}_specimen-{specimen}"
         print("export to", export_name, end="\n\n")
