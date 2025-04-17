@@ -66,7 +66,7 @@ if __name__ == "__main__":
         # Just for fun, assume that sometimes a file
         # does not correspond to an entry in metadata.
         skip_metadata = np.random.choice(
-            (True, False), p=(0.2, 0.8)
+            (True, False), p=(0.1, 0.9)
         )
         if skip_metadata:
             print(f"Exluded {patient_dict}")
