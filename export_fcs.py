@@ -93,16 +93,9 @@ if __name__ == "__main__":
     metadata = pd.read_excel(
         args["metadata"]
     )
-    
-    os.makedirs(
-        output_path / "compensation_matrices",
-        exist_ok=True
-    )
-    os.makedirs(
-        output_path / "samples",
-        exist_ok=True
-    )
 
+    os.mkdir(output_path)
+    
     anonymous_metadata = []
     for fpath in input_path.iterdir():
         sample = read_analysis(fpath)
