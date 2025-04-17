@@ -8,7 +8,24 @@ import numpy as np
 import pandas as pd
 import flowkit as fk
 from flowio import read_multiple_data_sets
+from natsort import natsort_keygen, natsorted
 
+def get_mappings(tree):
+    retrieve_list = tree.findall(".//Columns")
+    assert len(retrieve_list) == 1, "That's weird"
+    cols_element = retrieve_list[0]
+    label_mapping = {}
+    channel_mapping = {}
+    # Hacky stuff for multi datasets files
+    for col_element in cols_element:
+        if "(2)" not in col_element.attrib["N"]:
+            continue
+        detector = col_element.find("Detector").text
+        label = col_element.find("Description").text
+        original_name = col_element.find("OriginalName").text
+        channel_mapping[detector] = original_name
+        label_mapping[original_name] = label
+    return label_mapping, channel_mapping
 
 class SampleManualCompensation(fk.Sample):
     def __init__(self, *args, xml_path, **kwargs):
@@ -24,23 +41,45 @@ class SampleManualCompensation(fk.Sample):
 
         self.compensation = self.read_compensation(xml_path)
 
-    def read_compensation(self, xml_path):
+    @staticmethod
+    def read_compensation(xml_path: str) -> fk.Matrix:
+        """
+        Read manual compensation matrix from xml files.
+        Use a lot of natsorting so that FL1 < FL2 < FL10 and not FL1 < FL10 < FL2
+        Not natsorting leads to funny compensation bugs.
+
+        Args:
+            xml_path (str): path to the xml file from analysis archive,
+            which contains the manual compensation.
+
+        Returns:
+            fk.Matrix: Flowkit compensation matrix, with properly sorted channels
+        """
         tree = ET.parse(xml_path)
         retrieve_list = tree.findall(".//Compensation")
         assert len(retrieve_list) == 1, "That's weird"
         compensation_element = retrieve_list[0]
 
-        detectors = [self.pnn_labels[i] for i in self.fluoro_indices]
-        fluorochromes = [self.pns_labels[i] for i in self.fluoro_indices]
-
-        channels = [pn.split(" ")[0] for pn in detectors]
         generator = (child.attrib for child in compensation_element.find("S"))
-        compensation_df = pd.DataFrame(generator).sort_values(by="S")
+        
+        
+        compensation_df = pd.DataFrame(generator).sort_values(by="S", key=natsort_keygen())
+
+        label_mapping, channel_mapping = get_mappings(tree)
+
+        compensation_df["S"] = compensation_df["S"].apply(lambda x: channel_mapping[x])
+        compensation_df["C"] = compensation_df["C"].apply(lambda x: channel_mapping[x])
+
         p = compensation_df.pivot(index="S", columns="C", values="V").astype(float)
-        p = p.loc[channels, channels].values
-        p = np.where(np.isnan(p), 0, p)
-        np.fill_diagonal(p, 1)
-        matrix = fk.Matrix(p, detectors, fluorochromes)
+        p = p.sort_index(key=natsort_keygen()).reindex(natsorted(p.columns), axis=1).T
+        p.fillna(0, inplace=True)
+        np.fill_diagonal(p.values, 1)
+    
+        sources = p.index.to_list()
+        fluorochromes = [label_mapping[el] for el in sources]
+    
+        matrix = fk.Matrix(p.values, sources, fluorochromes)
+
         return matrix
 
 
