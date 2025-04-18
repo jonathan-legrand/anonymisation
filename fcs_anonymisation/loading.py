@@ -71,7 +71,7 @@ class SampleManualCompensation(fk.Sample):
         compensation_df["C"] = compensation_df["C"].apply(lambda x: channel_mapping[x])
 
         p = compensation_df.pivot(index="S", columns="C", values="V").astype(float)
-        p = p.sort_index(key=natsort_keygen()).reindex(natsorted(p.columns), axis=1).T
+        p = p.sort_index(key=natsort_keygen()).reindex(natsorted(p.columns), axis=1)
         p.fillna(0, inplace=True)
         np.fill_diagonal(p.values, 1)
     
