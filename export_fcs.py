@@ -108,7 +108,6 @@ if __name__ == "__main__":
 
         specimen = get_specimen(fpath.name)
         new_name = matching_row[new_name_col]
-        #new_name = fpath.name
 
         export_name = f"sub-{new_name}_specimen-{specimen}"
         print("export to", export_name, end="\n\n")
