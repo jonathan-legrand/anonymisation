@@ -3,10 +3,14 @@ from zipfile import ZipFile
 import re
 import os
 import tempfile
+from itertools import product
+from functools import reduce
+from operator import eq
 
 import numpy as np
 import pandas as pd
 import flowkit as fk
+from flowutils.compensate import parse_compensation_matrix
 from flowio import read_multiple_data_sets
 from natsort import natsort_keygen, natsorted
 
@@ -39,10 +43,9 @@ class SampleManualCompensation(fk.Sample):
             self.fluoro_indices=[2,3,4,5,6,7,8,9,10,11]
             self.scatter_indices=[0,1]
 
-        self.compensation = self.read_compensation(xml_path)
+        self._load_compensation(xml_path)
 
-    @staticmethod
-    def read_compensation(xml_path: str) -> fk.Matrix:
+    def _load_compensation(self, xml_path: str) -> fk.Matrix:
         """
         Read manual compensation matrix from xml files.
         Use a lot of natsorting so that FL1 < FL2 < FL10 and not FL1 < FL10 < FL2
@@ -63,9 +66,13 @@ class SampleManualCompensation(fk.Sample):
         generator = (child.attrib for child in compensation_element.find("S"))
         
         
-        compensation_df = pd.DataFrame(generator).sort_values(by="S", key=natsort_keygen())
+        self.compensation_df = pd.DataFrame(generator).sort_values(by="S", key=natsort_keygen())
+        self.tree = tree
 
-        label_mapping, channel_mapping = get_mappings(tree)
+    @property
+    def compensation_matrix(self) -> fk.Matrix:
+        compensation_df = self.compensation_df.copy()
+        label_mapping, channel_mapping = get_mappings(self.tree)
 
         compensation_df["S"] = compensation_df["S"].apply(lambda x: channel_mapping[x])
         compensation_df["C"] = compensation_df["C"].apply(lambda x: channel_mapping[x])
@@ -81,6 +88,35 @@ class SampleManualCompensation(fk.Sample):
         matrix = fk.Matrix(p.values, sources, fluorochromes)
 
         return matrix
+    
+    @property
+    def compensation_spill_string(self) -> str:
+        df = self.compensation_df
+        sensors = df.S.unique()
+
+        n_sensors = len(sensors)
+        spill_string = f"{len(sensors)}"
+        for sensor in sensors:
+            spill_string += f",{sensor}"
+
+        for pair in product(sensors, sensors):
+            if reduce(eq, pair):
+                spill_string += ",1"
+                continue
+
+            msk = (df.S == pair[0]) & (df.C == pair[1])
+            n_matches = msk.sum()
+            if n_matches == 1:
+                spill_value = df.loc[msk, "V"].values[0]
+                spill_string += f",{spill_value}"
+            elif n_matches == 0:
+                spill_string += f",0"
+            else:
+                raise ValueError(f"Too many matches, something is wrong")
+
+        assert len(spill_string.split(",")) == (n_sensors ** 2 + n_sensors + 1)
+        return spill_string
+
 
 
 fcs_pattern = re.compile(r".*\.fcs$")

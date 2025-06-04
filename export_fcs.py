@@ -118,22 +118,21 @@ if __name__ == "__main__":
             subsample=False,
             col_multi_index=True,
         )
-        sample_compensation = sample.compensation.as_dataframe(fluoro_labels=True)
 
         os.mkdir(output_path / export_name)
 
         anonymous_sample = fk.Sample(
             sample_df,
             sample_id=new_name,
-            compensation=sample.compensation
         )
+        anonymous_sample.metadata["$SPILL"] = sample.compensation_spill_string
         anonymous_sample.export(
             filename=f"{export_name}_sample.fcs",
             source="raw",
-            include_metadata=False,
+            include_metadata=True,
             directory=output_path / export_name
         )
-        sample_compensation.to_csv(
+        sample.compensation_matrix.as_dataframe(fluoro_labels=True).to_csv(
             output_path / export_name / f"{export_name}_compensation.csv"
         )
 
