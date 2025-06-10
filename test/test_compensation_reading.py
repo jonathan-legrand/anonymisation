@@ -16,6 +16,5 @@ def test_compensation_is_consistent():
     sensors = sample.compensation_df.S.unique()
     reconstructed_arr = parse_compensation_matrix(spill_str, sensors)
     # First row in reconstructed array is an index
-    assert 0
     assert np.all(reconstructed_arr[1:, :] == matrix.matrix)
 
