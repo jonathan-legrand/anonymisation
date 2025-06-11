@@ -31,11 +31,15 @@ def get_mappings(tree):
         label_mapping[original_name] = label
     return label_mapping, channel_mapping
 
-class SampleManualCompensation(fk.Sample):
-    def __init__(self, *args, xml_path, **kwargs):
-        super().__init__(*args, **kwargs)
+class SampleCorrectChannelIndices(fk.Sample):
+    def __init__(self, *args, **kwargs):
+        if "compensation" in kwargs.keys():
+            comp = kwargs.pop("compensation")
+        else:
+            comp = None
 
-        # Correct channel idx issues
+        super().__init__(*args, **kwargs)
+        # Correct channel idx issues before compensation
         if self.pnn_labels[0]=='FS PEAK':
             self.fluoro_indices=[3,4,5,6,7,8,9,10,11,12]
             self.scatter_indices=[1,2]
@@ -43,6 +47,12 @@ class SampleManualCompensation(fk.Sample):
             self.fluoro_indices=[2,3,4,5,6,7,8,9,10,11]
             self.scatter_indices=[0,1]
 
+        self.compensation = comp
+        self.apply_compensation(comp)
+
+class SampleManualCompensation(SampleCorrectChannelIndices):
+    def __init__(self, *args, xml_path, **kwargs):
+        super().__init__(*args, **kwargs)
         self._load_compensation(xml_path)
 
     def _load_compensation(self, xml_path: str) -> fk.Matrix:

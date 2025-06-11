@@ -3,16 +3,17 @@ docstring = """
 We want to convert a directory of sensitive analysis file and convert
 them to usable, anonymous fcs data, with the proper compensation matrices.
 """
+import warnings
 import argparse
 import os
 import json
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 import flowkit as fk
-import seaborn as sns
 
-from fcs_anonymisation.loading import read_analysis
+from fcs_anonymisation.loading import read_analysis, SampleCorrectChannelIndices
 from fcs_anonymisation.matching import best_matching_row, get_specimen
 from fcs_anonymisation.defaults import (
     COLS_DESCRIPTION,
@@ -79,8 +80,8 @@ def load_col_specs(args):
         
 
 if __name__ == "__main__":
-    #parser = mock_parser()
     parser = init_argparse()
+    #parser = mock_parser()
     args = vars(parser.parse_args())
     print(args)
 
@@ -118,13 +119,33 @@ if __name__ == "__main__":
             col_multi_index=True,
         )
 
+        # Hacky stuff to properly rename sensors in spill
+        spill = sample.compensation_spill_string
+        spill_lst = spill.split(",")
+        spill_len = int(spill_lst[0])
+        pnn_fluo = np.array(sample.pnn_labels)[sample.fluoro_indices]
+        spill_lst[1:spill_len+1] = pnn_fluo
+        spill = ",".join(spill_lst)
+        assert isinstance(spill, str)
+
         os.mkdir(output_path / export_name)
 
-        anonymous_sample = fk.Sample(
+        anonymous_sample = SampleCorrectChannelIndices(
             sample_df,
             sample_id=new_name,
+            compensation=spill,
         )
-        anonymous_sample.metadata["$SPILL"] = sample.compensation_spill_string
+
+        # Fetch useful and anonymous metadata
+        n_params = int(sample.metadata["par"])
+        for i in range(1, n_params + 1): # 1 based indexing in metadata
+            for param_type in "g", "e", "r":
+                param_string = f"p{i}{param_type}"
+                try:
+                    anonymous_sample.metadata[param_string] = sample.metadata[param_string]
+                except KeyError as err:
+                    warnings.warn(f"Patient {new_name}, {err} is missing in metadata")
+
         anonymous_sample.export(
             filename=f"{export_name}_sample.fcs",
             source="raw",
