@@ -13,3 +13,5 @@ debug*
 load_multiple.ipynb
 Question.md
 outputs
+renv
+plots
