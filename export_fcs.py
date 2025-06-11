@@ -135,6 +135,7 @@ if __name__ == "__main__":
             sample_id=new_name,
             compensation=spill,
         )
+        assert anonymous_sample.compensation is not None
 
         # Fetch useful and anonymous metadata
         n_params = int(sample.metadata["par"])

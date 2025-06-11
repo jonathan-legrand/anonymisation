@@ -48,6 +48,7 @@ class SampleCorrectChannelIndices(fk.Sample):
             self.scatter_indices=[0,1]
 
         self.compensation = comp
+        self.metadata["SPILL"] = comp
         self.apply_compensation(comp)
 
 class SampleManualCompensation(SampleCorrectChannelIndices):
