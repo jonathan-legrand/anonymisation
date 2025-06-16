@@ -39,13 +39,30 @@ class SampleCorrectChannelIndices(fk.Sample):
             comp = None
 
         super().__init__(*args, **kwargs)
-        # Correct channel idx issues before compensation
-        if self.pnn_labels[0]=='FS PEAK':
-            self.fluoro_indices=[3,4,5,6,7,8,9,10,11,12]
-            self.scatter_indices=[1,2]
-        else:
-            self.fluoro_indices=[2,3,4,5,6,7,8,9,10,11]
-            self.scatter_indices=[0,1]
+        
+        # Correct channel idx issues before compensation,
+        # because flowkit automatic process does not work
+        # with our data
+        fluoro_indices = []
+        scatter_indices = []
+        null_channels = []
+        for idx, label in enumerate(self.pnn_labels):
+            if "FS" in label or "SS" in label:
+                scatter_indices.append(idx)
+            elif "FL" in label:
+                fluoro_indices.append(idx)
+            else:
+                null_channels.append(label)
+
+        labels = np.array(self.pnn_labels)
+        print("Automatically assigned fluo/scatter/null idx") 
+        print("fluo : ", labels[fluoro_indices]) 
+        print("scatter : ", labels[scatter_indices]) 
+        print("null : ", null_channels) 
+
+        self.fluoro_indices = fluoro_indices
+        self.scatter_indices = scatter_indices
+        self.null_channels = null_channels
 
         self.compensation = comp
         self.metadata["SPILL"] = comp
@@ -157,7 +174,7 @@ def read_analysis(fpath):
         samples = read_multiple_data_sets(tmp_fcs_path)
         with analysis.open(xml_files[0]) as xml_handle:
             sample = SampleManualCompensation(
-                samples[0], xml_path=xml_handle
+                samples[-1], xml_path=xml_handle
             )
 
         os.remove(tmp_fcs_path)

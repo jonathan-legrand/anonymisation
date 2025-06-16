@@ -11,6 +11,7 @@ from pathlib import Path
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import flowkit as fk
 
 from fcs_anonymisation.loading import read_analysis, SampleCorrectChannelIndices
@@ -126,7 +127,6 @@ if __name__ == "__main__":
         pnn_fluo = np.array(sample.pnn_labels)[sample.fluoro_indices]
         spill_lst[1:spill_len+1] = pnn_fluo
         spill = ",".join(spill_lst)
-        assert isinstance(spill, str)
 
         os.mkdir(output_path / export_name)
 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
         # Fetch useful and anonymous metadata
         n_params = int(sample.metadata["par"])
         for i in range(1, n_params + 1): # 1 based indexing in metadata
-            for param_type in "g", "e", "r":
+            for param_type in "g", "e", "r", "n", "s", "b":
                 param_string = f"p{i}{param_type}"
                 try:
                     anonymous_sample.metadata[param_string] = sample.metadata[param_string]
