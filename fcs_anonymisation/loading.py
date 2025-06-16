@@ -65,7 +65,7 @@ class SampleCorrectChannelIndices(fk.Sample):
         self.null_channels = null_channels
 
         self.compensation = comp
-        self.metadata["SPILL"] = comp
+        self.metadata["spill"] = comp
         self.apply_compensation(comp)
 
 class SampleManualCompensation(SampleCorrectChannelIndices):
