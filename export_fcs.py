@@ -140,12 +140,29 @@ if __name__ == "__main__":
         # Fetch useful and anonymous metadata
         n_params = int(sample.metadata["par"])
         for i in range(1, n_params + 1): # 1 based indexing in metadata
-            for param_type in "g", "e", "r", "n", "s", "b":
+            for param_type in "g", "e", "r", "n", "b":
                 param_string = f"p{i}{param_type}"
                 try:
                     anonymous_sample.metadata[param_string] = sample.metadata[param_string]
                 except KeyError as err:
                     warnings.warn(f"Patient {new_name}, {err} is missing in metadata")
+
+        essential_fcs_keywords = [
+            "beginanalysis",
+            "endanalysis",
+            "beginstext",
+            "endstext",
+            "begindata",
+            "enddata",
+            "byteord",
+            "datatype",
+            "mode",
+            "nextdata",
+            "tot",
+            "par"
+        ]
+        for essential_keyword in essential_fcs_keywords:
+            anonymous_sample.metadata[essential_keyword] = sample.metadata[essential_keyword]
 
         anonymous_sample.export(
             filename=f"{export_name}_sample.fcs",
