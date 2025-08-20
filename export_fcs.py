@@ -127,11 +127,12 @@ if __name__ == "__main__":
 
         os.mkdir(output_path / export_name)
         
-        # TODO Store comp string in R sample
-        # TODO export R FCS with a proper name
+        fcs_output_name = output_path / export_name / f"{export_name}.fcs"
+        r.assign("anonymous_sample", r_sample)
+        r(f"identifier(anonymous_sample) <- '{export_name}'")
+        r(f"keyword(anonymous_sample)['$spillover'] <- '{compensation.compensation_spill_string}'")
+        r(f"write.FCS(anonymous_sample, filename = '{fcs_output_name}')")
 
-        
-        breakpoint()
         compensation.compensation_matrix.as_dataframe(fluoro_labels=True).to_csv(
             output_path / export_name / f"{export_name}_compensation.csv"
         )
