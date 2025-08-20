@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
-import re
 import os
 import tempfile
 from itertools import product
@@ -10,8 +9,6 @@ from operator import eq
 import numpy as np
 import pandas as pd
 import flowkit as fk
-from flowutils.compensate import parse_compensation_matrix
-from flowio import read_multiple_data_sets
 from natsort import natsort_keygen, natsorted
 
 def get_mappings(tree):
@@ -68,9 +65,8 @@ class SampleCorrectChannelIndices(fk.Sample):
         self.metadata["spill"] = comp
         self.apply_compensation(comp)
 
-class SampleManualCompensation(SampleCorrectChannelIndices):
-    def __init__(self, *args, xml_path, **kwargs):
-        super().__init__(*args, **kwargs)
+class XMLCompensation:
+    def __init__(self, xml_path):
         self._load_compensation(xml_path)
 
     def _load_compensation(self, xml_path: str) -> fk.Matrix:
@@ -146,38 +142,22 @@ class SampleManualCompensation(SampleCorrectChannelIndices):
         return spill_string
 
 
+from rpy2.robjects import r
+from rpy2.robjects.methods import RS4
 
-fcs_pattern = re.compile(r".*\.fcs$")
-xml_pattern = re.compile(r".*\.xml$")
+
+# Load the R file
+r['source']('R_functions/sample_anonymisation.R')
 
 def read_analysis(fpath):
     """
-    Extract analysis files, read and apply compensation, return fcs.
-    At this stage, the FCS isn't anonymous yet.
+    Extract analysis files using R function, read compensation
     """
-    with ZipFile(fpath, "r") as analysis:
-        fnames = analysis.namelist()
-        fcs_files = tuple(filter(fcs_pattern.match, fnames))
-        xml_files = tuple(filter(xml_pattern.match, fnames))
-        assert len(fcs_files) == 1
-        assert len(xml_files) == 1
+    R_output = r['anonymize_sample'](str(fpath)) # That could be not cross platform
+    temp_xml_fname = list(R_output[1])[0]
+    sample = R_output[0]
+    compensation = XMLCompensation(temp_xml_fname)
+    os.remove(temp_xml_fname)
 
-        # Extract the FCS file to a temporary file and read datasets from it
-        # because read_multiple_datasets is broken with file streams
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_fcs:
-            tmp_fcs.write(analysis.read(fcs_files[0]))
-            tmp_fcs_path = tmp_fcs.name
-
-        # Read the FCS file using the file path
-        # Sometimes there are several datasets per 
-        # fcs file, we are only interested in first one
-        samples = read_multiple_data_sets(tmp_fcs_path)
-        with analysis.open(xml_files[0]) as xml_handle:
-            sample = SampleManualCompensation(
-                samples[-1], xml_path=xml_handle
-            )
-
-        os.remove(tmp_fcs_path)
-
-    return sample
+    return sample, compensation
     

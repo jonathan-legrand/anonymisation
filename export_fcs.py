@@ -12,7 +12,6 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import flowkit as fk
 
 from fcs_anonymisation.loading import read_analysis, SampleCorrectChannelIndices
 from fcs_anonymisation.matching import best_matching_row, get_specimen
@@ -20,6 +19,8 @@ from fcs_anonymisation.defaults import (
     COLS_DESCRIPTION,
     COL_WHITE_LIST,
 )
+
+from rpy2.robjects import r
 
 def init_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -100,7 +101,7 @@ if __name__ == "__main__":
     
     anonymous_metadata = []
     for fpath in input_path.iterdir():
-        sample = read_analysis(fpath)
+        r_sample, compensation = read_analysis(fpath)
         try:
             matching_row, _ = best_matching_row(fpath.name, metadata)
         except ValueError as err:
@@ -108,69 +109,30 @@ if __name__ == "__main__":
             print(f"No good enough matching row found for {fpath}, skipping")
             continue
 
+
         specimen = get_specimen(fpath.name)
         new_name = matching_row[new_name_col]
 
         export_name = f"sub-{new_name}_specimen-{specimen}"
         print("export to", export_name, end="\n\n")
 
-        sample_df = sample.as_dataframe(
-            source="raw",
-            subsample=False,
-            col_multi_index=True,
-        )
-
         # Hacky stuff to properly rename sensors in spill
-        spill = sample.compensation_spill_string
-        spill_lst = spill.split(",")
-        spill_len = int(spill_lst[0])
-        pnn_fluo = np.array(sample.pnn_labels)[sample.fluoro_indices]
-        spill_lst[1:spill_len+1] = pnn_fluo
-        spill = ",".join(spill_lst)
+        # This won't work with flowCore
+        #spill = compensation.compensation_spill_string
+        #spill_lst = spill.split(",")
+        #spill_len = int(spill_lst[0])
+        #pnn_fluo = np.array(sample.pnn_labels)[sample.fluoro_indices]
+        #spill_lst[1:spill_len+1] = pnn_fluo
+        #spill = ",".join(spill_lst)
 
         os.mkdir(output_path / export_name)
+        
+        # TODO Store comp string in R sample
+        # TODO export R FCS with a proper name
 
-        anonymous_sample = SampleCorrectChannelIndices(
-            sample_df,
-            sample_id=new_name,
-            compensation=spill,
-        )
-        assert anonymous_sample.compensation is not None
-
-        # Fetch useful and anonymous metadata
-        n_params = int(sample.metadata["par"])
-        for i in range(1, n_params + 1): # 1 based indexing in metadata
-            for param_type in "g", "e", "r", "n", "b":
-                param_string = f"p{i}{param_type}"
-                try:
-                    anonymous_sample.metadata[param_string] = sample.metadata[param_string]
-                except KeyError as err:
-                    warnings.warn(f"Patient {new_name}, {err} is missing in metadata")
-
-        essential_fcs_keywords = [
-            "beginanalysis",
-            "endanalysis",
-            "beginstext",
-            "endstext",
-            "begindata",
-            "enddata",
-            "byteord",
-            "datatype",
-            "mode",
-            "nextdata",
-            "tot",
-            "par"
-        ]
-        for essential_keyword in essential_fcs_keywords:
-            anonymous_sample.metadata[essential_keyword] = sample.metadata[essential_keyword]
-
-        anonymous_sample.export(
-            filename=f"{export_name}_sample.fcs",
-            source="raw",
-            include_metadata=True,
-            directory=output_path / export_name
-        )
-        sample.compensation_matrix.as_dataframe(fluoro_labels=True).to_csv(
+        
+        breakpoint()
+        compensation.compensation_matrix.as_dataframe(fluoro_labels=True).to_csv(
             output_path / export_name / f"{export_name}_compensation.csv"
         )
 
