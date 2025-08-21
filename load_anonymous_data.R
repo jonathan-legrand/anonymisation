@@ -8,8 +8,13 @@ library(plot.matrix)
 source <- "line"
 fname <- file.path(
   "mock_output",
-  "sub-672681965_specimen-marrow",
-  "sub-672681965_specimen-marrow_sample.fcs"
+  "sub-266181764_specimen-marrow",
+  "sub-266181764_specimen-marrow_sample.fcs"
+)
+csv_name <- file.path(
+  "mock_output",
+  "sub-266181764_specimen-marrow",
+  "sub-266181764_specimen-marrow_compensation.csv"
 )
 
 x <- read.FCS(
@@ -17,23 +22,27 @@ x <- read.FCS(
   alter.name = TRUE
 )
 
-spillover(x)
+manual_compensation <- as.matrix(read.csv(
+  csv_name,
+  header = TRUE,
+  row.names = 1
+))
+
 summary(x, digits = digits, maxsum = maxsum)
-autoplot(x, "FS.A", "SS.A", bins = 200, transorm = FALSE) +
+autoplot(x, "FS.INT.LIN", "SS.INT.LIN", bins = 200, transorm = FALSE) +
   scale_x_continuous(limits = c(0, 1e7)) +
   theme_minimal()
 
-comp <- spillover(x)[[1]]
-plot(comp)
-x_comp <- compensate(x, comp)
+plot(manual_compensation)
+x_comp <- compensate(x, manual_compensation)
 
-channels_of_interest <- c("FL5.A", "FL4.A")
+channels_of_interest <- c("FL5.INT.LOG", "FL4.INT.LOG")
 trans_list <- estimateLogicle(x, channels_of_interest)
-trans <- logicleTransform(
-  transformationId = "Manual transformation",
-  w = 0, a = 0, t = 1048575, m = 4.5
-)
-trans_list <- transformList(channels_of_interest, trans)
+#trans <- logicleTransform(
+#  transformationId = "Manual transformation",
+#  w = 0, a = 0, t = 1048575, m = 4.5
+#)
+#trans_list <- transformList(channels_of_interest, trans)
 
 N_BINS <- 200
 p1 <- autoplot(
