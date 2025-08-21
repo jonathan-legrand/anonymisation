@@ -116,27 +116,24 @@ if __name__ == "__main__":
         export_name = f"sub-{new_name}_specimen-{specimen}"
         print("export to", export_name, end="\n\n")
 
-        # Hacky stuff to properly rename sensors in spill
-        # This won't work with flowCore
-        #spill = compensation.compensation_spill_string
-        #spill_lst = spill.split(",")
-        #spill_len = int(spill_lst[0])
-        #pnn_fluo = np.array(sample.pnn_labels)[sample.fluoro_indices]
-        #spill_lst[1:spill_len+1] = pnn_fluo
-        #spill = ",".join(spill_lst)
-
         os.mkdir(output_path / export_name)
         
-        fcs_output_name = output_path / export_name / f"{export_name}.fcs"
+        from rpy2.robjects.vectors import StrVector
+        
+        # Export sample using R flowCore
+        fcs_output_name = str(output_path / export_name / f"{export_name}_sample.fcs")
+        r("library(flowCore)")
         r.assign("anonymous_sample", r_sample)
         r(f"identifier(anonymous_sample) <- '{export_name}'")
-        r(f"keyword(anonymous_sample)['$spillover'] <- '{compensation.compensation_spill_string}'")
+
         r(f"write.FCS(anonymous_sample, filename = '{fcs_output_name}')")
 
-        compensation.compensation_matrix.as_dataframe(fluoro_labels=True).to_csv(
+        # Also export compensation by itself to be explicit
+        compensation.compensation_matrix.as_dataframe(fluoro_labels=False).to_csv(
             output_path / export_name / f"{export_name}_compensation.csv"
         )
 
+        # Store subject's anonymous metadata
         anonymous_metadata.append(
             matching_row[col_white_list]
         )
