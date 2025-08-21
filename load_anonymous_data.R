@@ -15,11 +15,11 @@ x <- read.FCS(
   transformation = TRUE
 )
 
-manual_compensation <- t(as.matrix(read.csv(
+manual_compensation <- as.matrix(read.csv(
   csv_name,
   header = TRUE,
   row.names = 1
-)))
+))
 
 summary(x)
 autoplot(x, "FS.A", "SS.A", bins = 200, transorm = FALSE) +

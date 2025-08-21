@@ -114,7 +114,7 @@ class XMLCompensation:
                 spill_string += ",1"
                 continue
 
-            msk = (df.S == pair[0]) & (df.C == pair[1])
+            msk = (df.S == pair[1]) & (df.C == pair[0])
             n_matches = msk.sum()
             if n_matches == 1:
                 spill_value = df.loc[msk, "V"].values[0]
@@ -129,7 +129,6 @@ class XMLCompensation:
 
 
 from rpy2.robjects import r
-from rpy2.robjects.methods import RS4
 
 
 # Load the R file
