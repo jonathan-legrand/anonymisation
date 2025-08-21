@@ -24,8 +24,8 @@ config = get_config()
 datapath = Path(config["DATAPATH"])
 metadata = pd.read_excel(datapath / "metadata.xlsx")
 
-fcs_path = datapath / "000010.fcs"
-xml_path = datapath / "000011.xml"
+fcs_path = datapath / "000002.fcs"
+xml_path = datapath / "000003.xml"
 random.seed(1234)
 rng = np.random.default_rng(seed=1234)
 N_MOCK_COLUMNS = 10

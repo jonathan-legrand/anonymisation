@@ -7,8 +7,8 @@ library(gridExtra)
 library(plot.matrix)
 library(patchwork)
 
-fname <- "mock_output/sub-183205182_specimen-blood/sub-183205182_specimen-blood_sample.fcs"
-csv_name <- "mock_output/sub-183205182_specimen-blood/sub-183205182_specimen-blood_compensation.csv"
+fname <- "mock_output/sub-418998134_specimen-marrow/sub-418998134_specimen-marrow_sample.fcs"
+csv_name <- "mock_output/sub-418998134_specimen-marrow/sub-418998134_specimen-marrow_compensation.csv"
 x <- read.FCS(
   fname,
   alter.name = TRUE,
