@@ -118,8 +118,6 @@ if __name__ == "__main__":
 
         os.mkdir(output_path / export_name)
         
-        from rpy2.robjects.vectors import StrVector
-        
         # Export sample using R flowCore
         fcs_output_name = str(output_path / export_name / f"{export_name}_sample.fcs")
         r("library(flowCore)")
@@ -129,7 +127,7 @@ if __name__ == "__main__":
         r(f"write.FCS(anonymous_sample, filename = '{fcs_output_name}')")
 
         # Also export compensation by itself to be explicit
-        compensation.mat_from_spill.as_dataframe(fluoro_labels=False).to_csv(
+        compensation.matrix.as_dataframe(fluoro_labels=False).to_csv(
             output_path / export_name / f"{export_name}_compensation.csv"
         )
 
