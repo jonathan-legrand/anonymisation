@@ -129,7 +129,7 @@ if __name__ == "__main__":
         r(f"write.FCS(anonymous_sample, filename = '{fcs_output_name}')")
 
         # Also export compensation by itself to be explicit
-        compensation.compensation_matrix.as_dataframe(fluoro_labels=False).to_csv(
+        compensation.mat_from_spill.as_dataframe(fluoro_labels=False).to_csv(
             output_path / export_name / f"{export_name}_compensation.csv"
         )
 

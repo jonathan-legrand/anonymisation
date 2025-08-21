@@ -94,27 +94,13 @@ class XMLCompensation:
         self.tree = tree
 
     @property
-    def compensation_matrix(self) -> fk.Matrix:
-        compensation_df = self.compensation_df.copy()
-        label_mapping, channel_mapping = get_mappings(self.tree)
-
-        compensation_df["S"] = compensation_df["S"].apply(lambda x: channel_mapping[x])
-        compensation_df["C"] = compensation_df["C"].apply(lambda x: channel_mapping[x])
-
-        p = compensation_df.pivot(index="S", columns="C", values="V").astype(float)
-        p = p.sort_index(key=natsort_keygen()).reindex(natsorted(p.columns), axis=1)
-        p.fillna(0, inplace=True)
-        np.fill_diagonal(p.values, 1)
-    
-        sources = p.index.to_list()
-        fluorochromes = [label_mapping[el] for el in sources]
-    
-        matrix = fk.Matrix(p.values, sources, fluorochromes)
-
-        return matrix
+    def matrix(self):
+        spill_str = self.spill_string
+        sensors = self.compensation_df.S.unique()
+        return fk.Matrix(spill_str, detectors=sensors)
     
     @property
-    def compensation_spill_string(self) -> str:
+    def spill_string(self) -> str:
         df = self.compensation_df
         sensors = df.S.unique()
 
