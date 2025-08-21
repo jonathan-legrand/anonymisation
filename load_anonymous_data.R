@@ -5,21 +5,12 @@ library(ggcyto, help, pos = 2, lib.loc = NULL)
 library(gridExtra)
 library(plot.matrix)
 
-source <- "line"
-fname <- file.path(
-  "mock_output",
-  "sub-266181764_specimen-marrow",
-  "sub-266181764_specimen-marrow_sample.fcs"
-)
-csv_name <- file.path(
-  "mock_output",
-  "sub-266181764_specimen-marrow",
-  "sub-266181764_specimen-marrow_compensation.csv"
-)
-
+fname <- "mock_output/sub-266181764_specimen-blood/sub-266181764_specimen-blood_sample.fcs"
+csv_name <- "mock_output/sub-266181764_specimen-blood/sub-266181764_specimen-blood_compensation.csv"
 x <- read.FCS(
   fname,
-  alter.name = TRUE
+  alter.name = TRUE,
+  transformation = TRUE
 )
 
 manual_compensation <- as.matrix(read.csv(
@@ -28,15 +19,15 @@ manual_compensation <- as.matrix(read.csv(
   row.names = 1
 ))
 
-summary(x, digits = digits, maxsum = maxsum)
-autoplot(x, "FS.INT.LIN", "SS.INT.LIN", bins = 200, transorm = FALSE) +
+summary(x)
+autoplot(x, "FS.A", "SS.A", bins = 200, transorm = FALSE) +
   scale_x_continuous(limits = c(0, 1e7)) +
   theme_minimal()
 
 plot(manual_compensation)
 x_comp <- compensate(x, manual_compensation)
 
-channels_of_interest <- c("FL5.INT.LOG", "FL4.INT.LOG")
+channels_of_interest <- c("FL5.A", "FL4.A")
 trans_list <- estimateLogicle(x, channels_of_interest)
 #trans <- logicleTransform(
 #  transformationId = "Manual transformation",
@@ -80,15 +71,3 @@ ggsave(
   height = 8,
   units = "cm"
 )
-
-
-library(flowCore)
-library(ggplot2)
-
-# Convert the flowFrame to a data frame
-x_trans <- transform(x_comp, trans_list)
-df <- as.data.frame(exprs(x_trans))
-
-# Plot using ggplot
-ggplot(df, aes(x = FS.A, y = SS.A)) +
-  geom_point(size = 1)
